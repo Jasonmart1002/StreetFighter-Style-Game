@@ -19,9 +19,26 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 
+#define fighter variables
+WARRIOR_SIZE = 162
+WARRIOR_SCALE = 4
+WARRIOR_OFFSET = [72, 56]
+WARRIOR_DATA = [WARRIOR_SIZE, WARRIOR_SCALE, WARRIOR_OFFSET]
+WIZARD_SIZE = 250
+WIZARD_SCALE = 3
+WIZARD_OFFSET = [112, 107]
+WIZARD_DATA = [WIZARD_SIZE, WIZARD_SCALE, WIZARD_OFFSET]
 
 #load background image
 bg_image = pygame.image.load("assets/images/background/background.png").convert_alpha()
+
+#load sprite sheets
+warrior_sheet = pygame.image.load("assets/images/warrior/Sprites/warrior.png")
+wizard_sheet = pygame.image.load("assets/images/wizard/Sprites/wizard.png")
+
+#define number of steps in each animation
+WARRIOR_ANIMATION_STEPS = [10, 8, 1, 7, 7, 3, 7]
+WIZARD_ANIMATION_STEPS = [8, 8, 1, 8, 8, 3, 7]
 
 #function for drawing backgound
 def draw_bg():
@@ -36,8 +53,8 @@ def draw_health_bar(health, x, y):
     pygame.draw.rect(screen, YELLOW, (x, y, 400 * ratio, 30))
 
 #create two instances of fighters
-fighter_1 = Fighter(200,310)
-fighter_2 = Fighter(700,310)
+fighter_1 = Fighter(200,310, False, WARRIOR_DATA, warrior_sheet, WARRIOR_ANIMATION_STEPS)
+fighter_2 = Fighter(700,310, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATION_STEPS)
 
 
 #game loop
@@ -55,6 +72,10 @@ while run:
 
     #move fighters
     fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2)
+
+    #update fighters
+    fighter_1.update()
+    fighter_2.update()
 
     #draw fighters
     fighter_1.draw(screen)
