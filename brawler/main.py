@@ -72,6 +72,7 @@ while run:
 
     #move fighters
     fighter_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_2)
+    fighter_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, fighter_1, ai=True)
 
     #update fighters
     fighter_1.update()

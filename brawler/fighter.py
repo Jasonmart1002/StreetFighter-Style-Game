@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Fighter():
     def __init__(self, x, y, flip, data, sprite_sheet, animation_steps):
@@ -21,6 +22,7 @@ class Fighter():
         self.hit = False
         self.health = 100
         self.alive = True
+        self.attack_key_pressed_time = None
 
     def load_images(self, sprite_sheet, animation_steps):
         #extract images from sprite sheet
@@ -33,7 +35,7 @@ class Fighter():
             animation_list.append(temp_image_list)
         return animation_list
 
-    def move(self, screen_width, screen_height, surface, target):
+    def move(self, screen_width, screen_height, surface, target, ai=False):
         SPEED = 10
         GRAVITY = 2
         dx = 0
@@ -41,30 +43,64 @@ class Fighter():
         self.running = False
         self.attack_type =  0
 
-        #get keypresses
-        key = pygame.key.get_pressed()
+        if ai:  # If controlled by AI
+            distance_x = abs(target.rect.x - self.rect.x)
+            distance_y = abs(target.rect.y - self.rect.y)
 
-        #can only perform other actions if not currently attacking
-        if self.attacking == False:
-            #movement
-            if key[pygame.K_a]:
-                dx = -SPEED
-                self.running = True
-            if key[pygame.K_d]:
-                dx = SPEED
-                self.running = True
-            #jump
-            if key[pygame.K_w] and self.jump == False:
-                self.vel_y = -30
-                self.jump = True
-            #attack
-            if key[pygame.K_j] or key[pygame.K_i]:
-                self.attack(surface, target)
-                #determine which attack type was used
-                if key[pygame.K_j]:
-                    self.attack_type = 1
-                if key[pygame.K_i]:
-                    self.attack_type = 2
+            if target.attacking:  # If the target is attacking, try to evade
+                evasion = random.randint(0, 100)
+                if evasion < 50 and self.jump == False:  # 50% chance to jump
+                    self.vel_y = -30
+                    self.jump = True
+                elif evasion < 100:  # 50% chance to move away from the target
+                    if self.rect.x > target.rect.x:
+                        dx = SPEED
+                    else:
+                        dx = -SPEED
+                    self.running = True
+            else:
+                if distance_x > 150:  # If too far away from the target, move towards it
+                    if self.rect.x > target.rect.x:
+                        dx = -SPEED
+                    else:
+                        dx = SPEED
+                    self.running = True
+                else:  # Closer to the target
+                    random_move = random.randint(0, 100)
+                    if random_move < 25 and self.jump == False and distance_y > 50:
+                        self.vel_y = -30
+                        self.jump = True
+                    elif random_move < 50 and self.attacking == False:
+                        self.attack(surface, target)
+                        self.attack_type = 1
+                    elif random_move < 75 and self.attacking == False:
+                        self.attack(surface, target)
+                        self.attack_type = 2
+        else:
+            #get keypresses
+            key = pygame.key.get_pressed()
+
+            #can only perform other actions if not currently attacking
+            if self.attacking == False:
+                #movement
+                if key[pygame.K_a]:
+                    dx = -SPEED
+                    self.running = True
+                if key[pygame.K_d]:
+                    dx = SPEED
+                    self.running = True
+                #jump
+                if key[pygame.K_w] and self.jump == False:
+                    self.vel_y = -30
+                    self.jump = True
+                #attack
+                if key[pygame.K_j] or key[pygame.K_i]:
+                    self.attack(surface, target)
+                    #determine which attack type was used
+                    if key[pygame.K_j]:
+                        self.attack_type = 1
+                    if key[pygame.K_i]:
+                        self.attack_type = 2
 
         #apply gravity
         self.vel_y += GRAVITY
